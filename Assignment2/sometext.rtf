@@ -1,0 +1,33 @@
+{\rtf1\ansi\ansicpg1252\cocoartf949\cocoasubrtf540
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww9000\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f0\fs24 \cf0  14      | s::sList' => if same_string(s,str) then SOME(sList')\
+ 15                     else case all_except_option(str,sList') of\
+ 16                               NONE => NONE\
+ 17                             | SOME lst => SOME(s::lst)\
+\
+ case ssList of\
+ 21        [] => []\
+ 22      | ss::ssList' => case all_except_option(str,ss) of\
+ 23                            NONE => get_substitutions1(ssList',str)\
+ 24                          |SOME lst => lst @ get_substitutions1(ssList',str)\
+\
+ 38 fun printList(nil) = ()\
+ 39   | printList(x::xs) = (\
+ 40               print(x);\
+ 41               print("\\n");\
+ 42               printList(xs)\
+ 43               );\
+ 44 \
+\
+ 22 val test8 = all_same_color([(Hearts, Ace), (Hearts, Ace)]) = true\
+ 23 \
+ 24 val test9 = sum_cards([(Clubs, Num 2),(Clubs, Num 2)]) = 4\
+ 25 \
+ 26 val test10 = score([(Hearts, Num 2),(Clubs, Num 4)],10) = 4\
+ 27 \
+ 28 val test11 = officiate([(Hearts, Num 2),(Clubs, Num 4)],[Draw], 15) = 6\
+}
