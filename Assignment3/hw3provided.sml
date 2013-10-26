@@ -52,3 +52,25 @@ fun longest_string_helper f (sList: string list)  =
 val longest_string3 = longest_string_helper (fn(x,y) => x > y)
 
 val longest_string4 = longest_string_helper (fn(x,y) => x>=y)
+
+val longest_capitalized = longest_string1 o only_capitals
+
+val rev_string = implode o rev o explode
+
+fun first_answer f xs = 
+  case xs of
+       [] => raise NoAnswer
+     |x::xs' => case (f x) of 
+                     NONE => first_answer f xs'
+                   |SOME v => v
+
+fun all_answers f xs =
+  let fun helper(f,xs,acc) = 
+    case xs of 
+         [] => SOME acc
+       |x::xs' => case (f x) of
+                     NONE => NONE
+                     | SOME v => helper(f,xs',v@acc)
+  in
+    helper(f,xs,[])
+  end
