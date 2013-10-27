@@ -55,17 +55,20 @@ val longest_string4 = longest_string_helper (fn(x,y) => x>=y)
 
 val longest_capitalized = longest_string1 o only_capitals
 
-val rev_string = implode o rev o explode
+val rev_string = implode o rev o explode 
+(*convert to character list, reverse list, convert from character list to string*)
 
-fun first_answer f xs = 
+fun first_answer f xs = (*search until you find a value compliant with function,
+                           else raise an exception*)
   case xs of
        [] => raise NoAnswer
      |x::xs' => case (f x) of 
                      NONE => first_answer f xs'
                    |SOME v => v
 
-fun all_answers f xs =
-  let fun helper(f,xs,acc) = 
+fun all_answers f xs = (*creates list of elements that are compliant with
+  function, if one or more elements are compliant return NONE*)
+  let fun helper(f,xs,acc) = (*tail recursive helper*)
     case xs of 
          [] => SOME acc
        |x::xs' => case (f x) of
@@ -75,15 +78,17 @@ fun all_answers f xs =
     helper(f,xs,[])
   end
 
-val count_wildcards = g (fn ()=> 1) (fn x => 0)
+val count_wildcards = g (fn ()=> 1) (fn x => 0) (*only count wildcards*)
 
 val count_wild_and_variable_lengths = g (fn () => 1) (fn x => String.size(x))
+(*count both wild cards and length of variables*)
 
 fun count_some_var (s,p) = 
+(*don't count wildcards, count number of of variables that match s*)
   g (fn () => 0) (fn x => if s = x then 1 else 0) p
 
-fun check_pat p =
-  let fun makeStringList p =
+fun check_pat p = (*checks to see if all variables are unique*)
+  let fun makeStringList p = (*make string list of all variables*)
     case p of 
          Wildcard => [] 
        |Variable x => [x]
@@ -91,26 +96,34 @@ fun check_pat p =
        |ConstructorP(_,p) => makeStringList p
        |_ => []
   in
-    let fun noDuplicates sList =
+    let fun noDuplicates(sList: string list) = (*check for duplicates, true if no duplicates
+    in list, false otherwise*)
       case sList of
            [] => true
-         |s::sList'=>not (List.exists(fn t => s=t ) sList') andalso (noDuplicates
-         sList')
+         |s::sList'=>not (List.exists(fn t => s=t ) sList') andalso
+         (noDuplicates(sList'))
       in
         noDuplicates(makeStringList p)
     end
   end
 
-fun match(v: valu,p:pattern) = 
+fun match(v: valu,p:pattern) = (*follow matching rules described in assignment*) 
   case (v,p) of 
        (_,Wildcard) => SOME []
      |(_,Variable x) => SOME [(x,v)]
      |(Unit,UnitP) => SOME []
-     |(Const i, ConstP j) => if i=j then SOME [] else NONE
-     |(Tuple vs,TupleP ps) => all_answers (fn (x,y) => match(x,y)) (ListPair.zip(vs,ps))
-     |(Constructor(s1,v),ConstructorP(s2,p)) => if s1=s2 then match(v,p) else
-       NONE 
+     |(Const i, ConstP j) => if i=j then SOME [] 
+                             else NONE
+     |(Tuple vs,TupleP ps) => all_answers (fn (x,y) => match(x,y))
+     ((ListPair.zipEq(vs,ps)) handle UnequalLengths =>
+     [(Const(1),ConstP(2))])(*so returns NONE for tuples of unequal length,
+     hack*)
+     |(Constructor(s1,v),ConstructorP(s2,p)) => if s1=s2 then match(v,p) 
+                                                else NONE 
      |(_,_) => NONE
 
-fun first_match v pList = 
-  SOME (first_answer (fn p => match(v,p)) pList) handle NoAnswer => NONE 
+fun first_match v pList = (*returns the first pattern in the pattern list that
+  matches v, if no pattern matches v, then return NONE*)
+  SOME (first_answer (fn p => match(v,p)) pList) 
+  handle NoAnswer => NONE (*handle exception raised by first_answer when no
+  pattern matches v*) 
