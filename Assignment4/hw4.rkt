@@ -74,6 +74,27 @@
     (f 0)
     )
   )
+
+(define (cached-assoc xs n)
+  (letrec ([table (make-vector n #f)]
+          [next 0]
+          [f(lambda(v)
+               (let ([ans (vector-assoc v table)])
+                 (if ans
+                     ans
+                     (let ([new-ans (assoc v xs)])
+                       (cond [new-ans
+                           (begin
+                             (vector-set! table next new-ans)
+                             (set! next (if (= next (- n 1))
+                                            0
+                                            (+ next 1)))
+                             new-ans)])))))])
+    f))
+
+(define x (cached-assoc (list (cons 1 2) (cons 3 4) (cons 5 6)) 2))
+  
+                             
                      
                      
 
