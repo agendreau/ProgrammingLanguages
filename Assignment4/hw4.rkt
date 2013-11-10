@@ -18,16 +18,11 @@
   )
 
 (define (list-nth-mod xs n)
-  (if (< n 0)
-      (error "list-nth-mod: negative number")
-      (if (null? xs)
-          (error "list-nth-mod: empty list")
-          (car (list-tail xs (remainder n (length xs))))
-          )
-      )
+  (cond [(< n 0) (error "list-nth-mod: negative number")]
+        [(null? xs) (error "list-nth-mod: empty list")]
+        [#t (car (list-tail xs (remainder n (length xs))))]
+        )
   )
-
-(define ones (lambda () (cons 1 ones)))
 
 (define (stream-for-n-steps s n)
   (if (= n 0)
@@ -63,14 +58,12 @@
 (define (vector-assoc v vec)
   (letrec([leng (vector-length vec)]
           [f (lambda(i)
-               (if(= i leng)
-                  #f
-                  (if(and (pair? (vector-ref vec i)) 
-                          (equal? (car(vector-ref vec i)) v))
-                     (vector-ref vec i)
-                     (f (+ i 1))
-                     )
-                  ))])
+               (cond [(= i leng) #f]
+                     [(and (pair? (vector-ref vec i))
+                           (equal? (car(vector-ref vec i)) v))
+                      (vector-ref vec i)]
+                     [#t (f (+ i 1))]
+                     ))])
     (f 0)
     )
   )
@@ -83,19 +76,18 @@
                  (if ans
                      ans
                      (let ([new-ans (assoc v xs)])
-                       (cond [new-ans
+                       (if new-ans
                            (begin
                              (vector-set! table next new-ans)
                              (set! next (if (= next (- n 1))
                                             0
                                             (+ next 1)))
-                             new-ans)])))))])
+                             new-ans)
+                           #f)))))])
     f))
 
-(define x (cached-assoc (list (cons 1 2) (cons 3 4) (cons 5 6)) 2))
   
-                             
-                     
+                               
                      
 
  
