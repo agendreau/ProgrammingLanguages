@@ -53,6 +53,7 @@
   (cond [(var? e) 
          (envlookup env (var-string e))]
         [(int? e) e]
+        [(aunit? e) e]
         [(add? e) 
          (let ([v1 (eval-under-env (add-e1 e) env)]
                [v2 (eval-under-env (add-e2 e) env)])
@@ -73,6 +74,71 @@
                      )
                )
          ]
+        [(fun? e)
+           (closure env e)
+                   ]
+        [(mlet? e)
+         (let ([v (eval-under-env (mlet-e e) env)]
+               [s (mlet-var e)])
+           (eval-under-env (mlet-body e) (cons (cons s v) env))
+           )
+         ]
+        
+        [(call? e)
+         (let ([s1 (eval-under-env (call-funexp e) env)]
+               [s2 (eval-under-env (call-actual e) env)]
+               )
+           (if (closure? s1)
+               (let* ([func (closure-fun s1)]
+                      [cenv (closure-env s1)]
+                     [arg (cons (fun-formal func) s2)]
+                     [body (fun-body func)]
+                     [name (cons (fun-nameopt func) s1)]
+                     [environ (cons arg cenv)])
+                 (if (fun-nameopt func)
+                     (eval-under-env body (cons name environ))
+                     (eval-under-env body environ)
+                     )
+                 )
+               (error "call executed on non closure")
+               )
+           )
+         ]
+         
+        
+         
+        [(apair? e) 
+         (let ([v1 (eval-under-env (apair-e1 e) env)]
+               [v2 (eval-under-env (apair-e2 e) env)])
+           (apair v1 v2)
+           )
+         ]
+        [(fst? e)
+         (let ([v (eval-under-env (fst-e e) env)])
+           (if (apair? v)
+                       (apair-e1 v)
+                       (error "MUPL fst applied to non-pair")
+             )
+           )
+         ]
+        [(snd? e)
+         (let ([v (eval-under-env (snd-e e) env)])
+           (if (apair? v)
+                       (apair-e2 v)
+                       (error "MUPL snd applied to non-pair")
+             )
+           )
+         ]
+        [(isaunit? e)
+         (let ([v (eval-under-env (isaunit-e e) env)])
+           (if (aunit? v)
+               (int 1)
+               (int 0))
+           )]
+        
+        [(closure? e) e]
+       
+               
           
            
         ;; CHANGE add more cases here
@@ -84,15 +150,48 @@
         
 ;; Problem 3
 
-(define (ifaunit e1 e2 e3) "CHANGE")
+(define (ifaunit e1 e2 e3) 
+  (ifgreater (isaunit e1) (int 0)
+      e2
+      e3
+      )
+  )
 
-(define (mlet* lstlst e2) "CHANGE")
+(define (mlet* lstlst e2)
+  (if (null? lstlst)
+      e2
+      (mlet (car (car lstlst)) (cdr (car lstlst)) (mlet* (cdr lstlst) e2))
+      )
+  )
 
-(define (ifeq e1 e2 e3 e4) "CHANGE")
+(define (ifeq e1 e2 e3 e4) 
+  (mlet* (list (cons "_x" e1) (cons "_y" e2)) 
+         (ifgreater (var "_x") (var "_y") e4 (ifgreater (var "_y") (var "_x") e4 e3)))
+  )
+
 
 ;; Problem 4
 
-(define mupl-map "CHANGE")
+(define mupl-map 
+  (fun #f "func"
+       (fun "op" "lst"
+            (ifaunit (var "lst")
+                (aunit)
+                (apair (call (var "func") (fst (var "lst")))
+                       (call (var "op") (snd (var "lst"))))
+                )
+            )
+       )
+  )
+
+
+  
+              
+                             
+  
+
+                      
+
 
 (define mupl-mapAddN 
   (mlet "map" mupl-map
