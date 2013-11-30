@@ -223,7 +223,13 @@ fun preprocess_prog(e) =
                     
      | Intersect (e1,e2)=> Intersect(preprocess_prog(e1),preprocess_prog(e2))
      | Let(s,e1,e2) => Let(s,preprocess_prog(e1),preprocess_prog(e2))
-     | _ => e
+     | NoPoints => e
+     | Line _ => e
+     | Point _ => e
+     | VerticalLine _ => e
+     | Var s => e
+     | Shift(dx,dy,e1) => Shift(dx,dy,preprocess_prog(e1))
+     
            
 
 
