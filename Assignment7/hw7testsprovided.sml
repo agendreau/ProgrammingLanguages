@@ -10,6 +10,15 @@ use "hw7.sml";
 
 fun real_equal(x,y) = Real.compare(x,y) = General.EQUAL;
 
+let 
+  val LineSegment(x1,y1,x2,y2) =
+    preprocess_prog(LineSegment(1.00000999,1.0,1.0,2.0))
+in
+    if real_equal(x1,1.00000999) andalso real_equal(y1,1.0)
+      then print "good to go"
+    else print "failed"
+end;
+
 (* Preprocess tests *)
 let
 	val Point(a,b) = preprocess_prog(LineSegment(3.2,4.1,3.2,4.1))

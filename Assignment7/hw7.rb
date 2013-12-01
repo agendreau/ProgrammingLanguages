@@ -162,7 +162,7 @@ class Point < GeometryValue
   def inbetween(v,end1,end2)
     epsilon = GeometryExpression::Epsilon
     (end1 - epsilon <= v and v <= end2+epsilon) or 
-    (end2-epsilon <= v and v<= end2+epsilon)
+    (end2-epsilon <= v and v<= end1+epsilon)
   end
 
   public 
@@ -198,6 +198,7 @@ class Line < GeometryValue
   end
 
   def intersect other
+    #puts m; puts b;
     other.intersectLine self
   end
 
@@ -297,7 +298,7 @@ class LineSegment < GeometryValue
     elsif x1>x2
       LineSegment.new(x2,y2,x1,y1)
     else
-      LineSegment.new(x1,y1,x2,y2)
+      self
     end
   end
 
@@ -326,16 +327,14 @@ class LineSegment < GeometryValue
     end
 
     def intersectWithSegmentAsLineResult seg
-      puts "we tried to do this"
       if real_close(x1,x2)
-        if y1 < seg.y1
-          ax1=x1;ay1=y1;ax2=x2;ay2=y2;
-          bx1=seg.x1;by1=seg.y1;bx2=seg.x2;by2=seg.y2;
-        else
+        if seg.y1 < y1
           ax1 = seg.x1;ay1=seg.y1;ax2=seg.x2;ay2=seg.y2;
           bx1 = x1;by1=y1;bx2=x2;by2=y2;
+        else
+          ax1=x1;ay1=y1;ax2=x2;ay2=y2;
+          bx1=seg.x1;by1=seg.y1;bx2=seg.x2;by2=seg.y2;
         end
-        puts ax1; puts ax2; puts ay1; puts ay2;
         if real_close(ay2,by1)
           Point.new(ax2,ay2)
         elsif ay2<by1
@@ -346,15 +345,13 @@ class LineSegment < GeometryValue
           LineSegment.new(bx1,by1,ax2,ay2)
         end
       else
-        if x1< seg.x1
-          ax1=x1;ay1=y1;ax2=x2;ay2=y2;
-          bx1=seg.x1;by1=seg.y1;bx2=seg.x2;by2=seg.y2;
-        else
+        if seg.x1< x1
           ax1 = seg.x1;ay1=seg.y1;ax2=seg.x2;ay2=seg.y2;
           bx1 = x1;by1=y1;bx2=x2;by2=y2;
+        else
+          ax1=x1;ay1=y1;ax2=x2;ay2=y2;
+          bx1=seg.x1;by1=seg.y1;bx2=seg.x2;by2=seg.y2;
         end
-        puts ax1; puts ay1; puts ax2; puts ay2;
-        puts bx1; puts by1; puts bx2; puts by2;
         if real_close(ax2,bx1)
           Point.new(ax2,ay2)
         elsif ay2 < by1
@@ -362,7 +359,6 @@ class LineSegment < GeometryValue
         elsif ax2 > bx2
           LineSegment.new(bx1,by1,bx2,by2)
         else
-          puts "we did this"
           LineSegment.new(bx1,by1,ax2,ay2)
         end
       end
@@ -406,8 +402,7 @@ class Let < GeometryExpression
   end
 
   def eval_prog env
-    env1 = [[@s,@e1]].push(env)
-    puts env1
+    env1 = [[@s,(@e1.eval_prog env)]] + env
     @e2.eval_prog env1
   end
 
@@ -426,7 +421,7 @@ class Var < GeometryExpression
 
   def eval_prog env # remember: do not change this method
     pr = env.assoc @s
-    raise @s if pr.nil?
+    raise "undefined variable" if pr.nil?
     pr[1]
   end
 

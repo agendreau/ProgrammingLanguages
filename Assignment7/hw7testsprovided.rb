@@ -121,12 +121,6 @@ end
 d4 = d.intersect(LineSegment.new(-THREE,-FOUR,ONE,TWO))
 if not (((d4.is_a? LineSegment)) and d4.x1 == -THREE and d4.y1 == -FOUR and d4.x2 == ONE and d4.y2 == TWO)	
 	puts "LineSegment intersect not working properly 1"
-        puts d4
-        puts (d.is_a? LineSegment)
-        puts (d4.is_a? Point)
-        puts (d4.is_a? NoPoints)
-        puts (d4.is_a? Line)
-        puts (d4.is_a? VerticalLine)
 end
 d5 = d.intersect(LineSegment.new(TWO,THREE,FOUR,FIVE))
 if not ((d5.is_a? NoPoints))
@@ -134,11 +128,11 @@ if not ((d5.is_a? NoPoints))
 end
 
 #Intersect Tests
-#i = Intersect.new(LineSegment.new(-ONE,-TWO,THREE,FOUR), LineSegment.new(-ONE,-TWO,THREE,FOUR))
-#i1 = i.preprocess_prog.eval_prog([])
-#if not (i1.x1 == -ONE and i1.y1 == -TWO and i1.x2 == THREE and i1.y2 == FOUR)
-#	puts "Intersect eval_prog should return the intersect between e1 and e2"
-#end
+i = Intersect.new(LineSegment.new(-ONE,-TWO,THREE,FOUR), LineSegment.new(-ONE,-TWO,THREE,FOUR))
+i1 = i.preprocess_prog.eval_prog([])
+if not (i1.x1 == -ONE and i1.y1 == -TWO and i1.x2 == THREE and i1.y2 == FOUR)
+	puts "Intersect eval_prog should return the intersect between e1 and e2"
+end
 
 #Var Tests
 v = Var.new("a")
@@ -161,11 +155,8 @@ end
 #Let Variable Shadowing Test
 l2 = Let.new("a", LineSegment.new(-ONE, -TWO, THREE, FOUR),
               Let.new("b", LineSegment.new(THREE,FOUR,-ONE,-TWO), Intersect.new(Var.new("a"),Var.new("b"))))
-puts "we got here"
 l2 = l2.preprocess_prog
-puts "we got here1"
 l2 = l2.eval_prog([["a",Point.new(0,0)]])
-puts "we got here2"
 if not (l2.x1 == -ONE and l2.y1 == -TWO and l2.x2 == THREE and l2.y2 == FOUR)
 	puts "Let eval_prog should evaluate e2 after adding [s, e1] to the environment"
 end
@@ -178,5 +169,33 @@ if not (s1.x1 == TWO and s1.y1 == THREE and s1.x2 == SIX and s1.y2 == 9)
 	puts "Shift should shift e by dx and dy"
 end
 
+#Originally Failed Tests trying to fix
+s =  Line.new(5.0,0.0).intersect(LineSegment.new(1.0,5.0,2.0,2.0))
+if not(s.is_a? Point and s.x == ONE and s.y==FIVE)
+  puts "failed 1"
+end
 
+s1 = Line.new(5.0,0.0).intersectLineSegment(LineSegment.new(1.0,5.0,2.0,2.0))
+if not(s1.is_a? Point and s1.x == ONE and s1.y==FIVE)
+  puts "failed 2"
+end
 
+s2 = LineSegment.new(1.0,5.0,2.0,2.0).intersect(Line.new(5.0,0.0)) 
+if not(s2.is_a? Point and s2.x == ONE and s2.y==FIVE)
+  puts "failed 3"
+end
+
+s3 = LineSegment.new(1.0,5.0,2.0,2.0).intersectLine(Line.new(5.0,0.0))
+if not(s3.is_a? Point and s3.x == ONE and s3.y==FIVE)
+  puts "failed 4"
+end
+
+s4 = LineSegment.new(5.0,7.0,9.0,9.0).intersect(LineSegment.new(5.0,7.0,6.0,-1.0))
+if not(s4.is_a? Point and s4.x == FIVE and s4.y==SEVEN)
+  puts "failed 5"
+end
+
+s5 = LineSegment.new(5.0,7.0,9.0,9.0).intersectLineSegment(LineSegment.new(5.0,7.0,6.0,-1.0)) 
+if not(s5.is_a? Point and s5.x == FIVE and s5.y==SEVEN)
+  puts "failed 6"
+end
