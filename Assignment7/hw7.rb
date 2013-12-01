@@ -129,6 +129,39 @@ class Point < GeometryValue
   def shift(dx,dy)
     Point.new(@x+dx,@y+dy)
   end
+
+  def intersect other
+    other.intersectPoint self
+  end
+
+  def intersectPoint p
+    if real_close_point(p.x,p.y,x,y)
+      p
+    else
+      NoPoints.new
+    end
+  end
+
+  def intersectLine line
+    if real_close(y,line.m*x+line.b)
+      self
+    else
+      NoPoints.new
+    end
+  end
+
+  def intersectVerticalLine vline
+    if real_close(x,vline.x)
+      self
+    else
+      NoPoints.new
+    end
+  end
+
+  def intersectWithLineSegmentAsLineResult seg
+    #to fill in
+  end
+
 end
 
 class Line < GeometryValue
@@ -152,6 +185,36 @@ class Line < GeometryValue
     Line.new(m,(b+dy)-(m*dx))
   end
 
+  def intersect other
+    other.intersect self
+  end
+
+  def intersectPoint p
+    p.intersect self
+  end
+
+  def intersectLine line
+    if real_close(m,line.m)
+      if real_close(b,line.b)
+        self
+      else
+        NoPoints.new
+      end
+    else
+      x = (line.b-b)/(m-line.m)
+      y = m*x+b
+      Point.new(x,y)
+    end
+  end
+
+  def intersectVerticalLine vline
+    Point.new(vline.x,m*vline.x+b)
+  end
+
+  def intersectWithLineSegment seg
+    #to fill in
+  end
+
 end
 
 class VerticalLine < GeometryValue
@@ -172,6 +235,30 @@ class VerticalLine < GeometryValue
 
   def shift(dx,dy)
     VerticalLine.new(x+dx)
+  end
+
+  def intersect other
+    other.intersect self
+  end
+
+  def intersectPoint p
+    p.intersectPoint self
+  end
+
+  def intersectLine line
+    line.intersectLine self
+  end
+
+  def intersectVerticalLine vline
+    if real_close(x,vline.x)
+      self
+    else
+      NoPoints.new
+    end
+  end
+
+  def intersectWithLineSegment seg
+    #to fill in 
   end
 
 end
@@ -225,7 +312,7 @@ class Intersect < GeometryExpression
   end
 
   def eval_prog env
-    #fill in later
+    @e1.eval_prog.intersect(@e2.evalprog env) env
   end
 
 end
